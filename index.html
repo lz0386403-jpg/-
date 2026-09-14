@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>迈克尔孙干涉仪 · 波长与不确定度</title>
+<style>
+:root{font-family:"Microsoft YaHei",system-ui,sans-serif;color:#193b39;background:#f3f7f6;font-size:15px}*{box-sizing:border-box}body{margin:0}main{max-width:1080px;margin:42px auto;padding:0 24px}header{margin-bottom:26px}h1{font-size:29px;letter-spacing:1px;margin:10px 0}h2{font-size:19px;margin:0 0 20px}.eyebrow{font-size:12px;letter-spacing:3px;color:#477e75}p{line-height:1.8;color:#56716d}.layout{display:grid;grid-template-columns:1fr 1fr;gap:22px}.card{background:white;border:1px solid #dce6e3;border-radius:18px;padding:26px;margin-bottom:22px;box-shadow:0 6px 25px #20483c06}label{display:block;font-weight:600;margin-bottom:9px}textarea,input{font:inherit;width:100%;border:1px solid #bfceca;border-radius:9px;padding:12px;color:#183f37;background:#fcfdfd}textarea{height:87px;resize:vertical;line-height:1.6}input:focus,textarea:focus{outline:2px solid #5f9e8f;outline-offset:2px}.field{margin-bottom:20px}.hint{font-size:12px;color:#657a75;line-height:1.7;margin:7px 0 0}.row{display:grid;grid-template-columns:1fr 1fr;gap:15px}.actions{display:flex;flex-wrap:wrap;gap:10px}button{font:inherit;padding:11px 17px;border:1px solid #cbdad5;border-radius:9px;cursor:pointer;background:white;color:#215446}button.primary{background:#246a58;color:white;border-color:#246a58}button:hover{filter:brightness(.95)}button:disabled{opacity:.45;cursor:default}.result{background:#eff7f3;border-radius:12px;padding:19px;margin-bottom:15px}.result small{display:block;color:#4d7569}.big{font-size:30px;font-weight:700;display:block;margin:10px 0;overflow-wrap:anywhere}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px}.metric{background:#f6f8f7;border-radius:10px;padding:14px}.metric span{display:block;font-size:12px;color:#5b736c;margin-bottom:7px}.metric strong{font-size:17px}#status{margin-top:14px;line-height:1.7;color:#9a4d17;white-space:pre-line}.scroll{overflow:auto}table{border-collapse:collapse;width:100%;white-space:nowrap;font-size:14px}th,td{text-align:right;padding:12px;border-bottom:1px solid #e4eae7}th{background:#f3f7f5;color:#557267}th:first-child,td:first-child{text-align:left}details{line-height:1.9}summary{cursor:pointer;font-weight:600}.formula{font-family:Consolas,"Microsoft YaHei",monospace;color:#204a3e;background:#f5f8f6;padding:15px;border-radius:9px;white-space:pre-wrap}footer{font-size:12px;color:#73857e;margin:22px 0} @media(max-width:760px){main{margin:22px auto;padding:0 14px}.layout{grid-template-columns:1fr;gap:0}.card{padding:20px}h1{font-size:24px}.big{font-size:25px}}@media print{body{background:white}main{margin:0;max-width:none}.actions,footer{display:none}.card{box-shadow:none;break-inside:avoid}.layout{display:block}details{display:block}}
+</style>
+<main>
+<header><span class="eyebrow">OPTICS LAB / 光学实验</span><h1>迈克尔孙干涉仪波长计算器</h1><p>输入条纹累计计数与动镜位置，按课件逐差法完成数据处理。离线运行，数据仅在本页计算。</p></header>
+<div class="layout">
+<section class="card"><h2>01　实验数据</h2>
+<div class="field"><label for="k">条纹累计计数 k</label><textarea id="k" placeholder="例如：0, 50, 100, 150, 200, 250, 300, 350, 400, 450"></textarea><p class="hint">输入至少 4 个、数量为偶数的等间隔递增计数。支持逗号、空格、换行和 Excel 粘贴。</p></div>
+<div class="field"><label for="d">动镜位置 d（mm）</label><textarea id="d" placeholder="按顺序输入与 k 一一对应的位置读数"></textarea><p class="hint">输入原始位置读数，无需先减去初值。允许位置单调增加或减小。</p></div>
+<div class="row"><div class="field"><label for="delta">有效误差限 Δ（mm）</label><input id="delta" type="number" min="0" step="any" placeholder="按实验要求填写"><p class="hint">用于课件公式 uB(Δd) = Δ / √3；留空时仅计算 A 类。</p></div><div class="field"><label for="reference">参考波长（nm，可选）</label><input id="reference" type="number" min="0" step="any" placeholder="例如 632.8"><p class="hint">仅用于计算误差，不参与不确定度计算。</p></div></div>
+<div class="actions"><button class="primary" id="calculate">计算</button><button id="example">加载示例</button><button id="clear">清空</button></div><div id="status" role="status" aria-live="polite"></div>
+</section>
+<section class="card"><h2>02　计算结果</h2><div class="result"><small>平均波长 λ̄（nm）</small><span class="big" id="wavelength">—</span><div id="reported" class="hint">等待输入实验数据</div></div>
+<div class="metrics"><div class="metric"><span>A 类 uA(Δd) / mm</span><strong id="ua">—</strong></div><div class="metric"><span>B 类 uB(Δd) / mm</span><strong id="ub">—</strong></div><div class="metric"><span>合成 uc(Δd) / mm</span><strong id="uc">—</strong></div><div class="metric"><span>波长 uc(λ) / nm</span><strong id="ul">—</strong></div></div>
+<p id="extra" class="hint">—</p><div class="actions" style="margin-top:18px"><button id="export" disabled>导出计算报告 TXT</button></div>
+</section></div>
+<section class="card"><h2>03　逐差明细</h2><p class="hint" id="pairInfo">前半组与后半组一一配对；每个位置读数只使用一次。</p><div class="scroll"><table><thead><tr><th>配对（序号）</th><th>条纹差</th><th>位置差（mm）</th><th>单间隔 Δdᵢ（mm）</th><th>λᵢ（nm）</th></tr></thead><tbody id="rows"><tr><td colspan="5">计算后显示</td></tr></tbody></table></div></section>
+<section class="card"><details><summary>公式、参数含义与适用条件</summary><p>依据所提供课件第 15、27、28 页。将 2m 个读数分成前后两半，h 为相邻 k 的间隔。课件中的 10 个读数对应 m = 5，h = 50；程序允许其他偶数个等间隔读数。</p><div class="formula">Δdᵢ = |dᵢ₊ₘ − dᵢ| / m
+Δd̄ = ΣΔdᵢ / m
+λ̄ = 2Δd̄ / h × 10⁶ nm/mm
+uA(Δd) = √[Σ(Δdᵢ − Δd̄)² / (m(m − 1))]
+uB(Δd) = Δ / √3
+uc(Δd) = √[uA² + uB²]
+uc(λ) = 2uc(Δd) / h × 10⁶ nm/mm</div><p>Δ 是针对归一化单间隔位移 Δd 的有效误差限（均匀分布半宽），按老师或实验指导书的规定填写。课件列出的微动手轮分度值 0.0001 mm 不能自动等同于此误差限。若已知的是每个独立原始位置读数的误差限 a，且各读数 B 类误差独立同分布，则平均单间隔位移对应的有效 Δ = a√(2/m³)。存在共用零点、刻度误差等相关性时不能直接使用这个换算。</p><p>A 类按配对位移的重复性估计（自由度 m − 1）；B 类按给定误差限评定，按无有限自由度限制处理。合成时假设 A、B 分量独立且未重复计入同一误差来源；忽略条纹计数不确定度与其他未输入的系统效应。k 需等间隔递增，d 需严格单调，不能混用往返测量。此条件下波长是位移的线性函数，不需要非线性传播修正。</p><p>“λ ± uc(λ)”表示标准不确定度（覆盖因子 1），不代表严格的 95% 置信区间。报告中的不确定度保留两位有效数字，波长保留至相同小数位。示例数据为演示用模拟读数，不能当作实际实验结果。</p></details></section>
+<footer>单文件离线工具 · 浏览器双击打开即可使用 · 课件逐差法</footer>
+</main>
+<script>
+'use strict';
+function parseNumbers(text,name){
+ const tokens=text.trim().split(/[\s,，;；、]+/).filter(Boolean);
+ if(!tokens.length)throw Error('请输入'+name+'。');
+ if(tokens.length>10000)throw Error('单次最多输入 10000 个读数。');
+ return tokens.map((t,i)=>{if(!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(t)||!Number.isFinite(Number(t)))throw Error(name+' 第 '+(i+1)+' 项不是有效数字：'+t);return Number(t)});
+}
+function compute(k,d,delta=null,reference=null){
+ if(k.length!==d.length)throw Error('k 与 d 的数量必须相同。');
+ if(k.length<4||k.length%2)throw Error('逐差法需要至少 4 个、数量为偶数的读数；推荐输入 10 个。');
+ if(!k.every(x=>Number.isSafeInteger(x)&&x>=0))throw Error('k 必须是非负安全整数。');
+ if(!d.every(Number.isFinite))throw Error('d 必须是有限数值。');
+ const h=k[1]-k[0],m=k.length/2;
+ if(h<=0||k.some((x,i)=>i>0&&x-k[i-1]!==h))throw Error('k 必须等间隔且严格递增，例如 0, 50, 100, 150。');
+ const sign=Math.sign(d[1]-d[0]);
+ if(!sign||d.some((x,i)=>i>0&&Math.sign(x-d[i-1])!==sign))throw Error('d 必须严格单调增加或减小，请检查重复读数或往返测量。');
+ if(delta!==null&&(!Number.isFinite(delta)||delta<0))throw Error('Δ 必须是大于或等于 0 的有限数值。');
+ if(reference!==null&&(!Number.isFinite(reference)||reference<=0))throw Error('参考波长必须大于 0。');
+ const pairs=Array.from({length:m},(_,i)=>{const diff=Math.abs(d[i+m]-d[i]),x=diff/m;return {first:i+1,last:i+m+1,dk:k[i+m]-k[i],diff,x,lambda:2*x/h*1e6}});
+ const mean=pairs.reduce((s,p)=>s+p.x,0)/m,lambda=2*mean/h*1e6;
+ const ua=Math.sqrt(pairs.reduce((s,p)=>s+(p.x-mean)**2,0)/(m*(m-1)));
+ const ub=delta===null?null:delta/Math.sqrt(3),uc=ub===null?null:Math.hypot(ua,ub),ul=uc===null?null:2*uc/h*1e6;
+ if(![mean,lambda,ua,...(uc===null?[]:[ub,uc,ul])].every(Number.isFinite)||lambda<=0)throw Error('数值超出计算范围，请检查输入单位与数量级。');
+ return {k,d,delta,reference,h,m,pairs,mean,lambda,ua,ub,uc,ul};
+}
+function fmt(x){return x===null?'待填写 Δ':x===0?'0':Number(x.toPrecision(7)).toString()}
+function roundedReport(value,u){if(u===0)return fmt(value)+' ± 0 nm（输入模型下为零）';let place=Math.floor(Math.log10(u))-1;let rounded=Math.round(u/10**place)*10**place;place=Math.floor(Math.log10(rounded))-1;const decimals=Math.min(100,Math.max(0,-place));return (Math.round(value/10**place)*10**place).toFixed(decimals)+' ± '+(Math.round(u/10**place)*10**place).toFixed(decimals)+' nm'}
+const $=id=>document.getElementById(id);let last=null,report='';
+function resetResults(){last=null;report='';['wavelength','ua','ub','uc','ul','extra'].forEach(id=>$(id).textContent='—');$('reported').textContent='等待计算';$('rows').innerHTML='<tr><td colspan="5">计算后显示</td></tr>';$('pairInfo').textContent='前半组与后半组一一配对；每个位置读数只使用一次。';$('export').disabled=true}
+function run(){resetResults();$('status').textContent='';try{
+ const r=compute(parseNumbers($('k').value,'k'),parseNumbers($('d').value,'d'),$('delta').value.trim()===''?null:Number($('delta').value),$('reference').value.trim()===''?null:Number($('reference').value));last=r;
+ $('wavelength').textContent=fmt(r.lambda);['ua','ub','uc','ul'].forEach(id=>$(id).textContent=fmt(r[id]));
+ $('reported').textContent=r.ul===null?'填写 Δ 后可给出合成标准不确定度。':roundedReport(r.lambda,r.ul)+' · 标准不确定度，覆盖因子 1';
+ const extra=['单间隔平均位移：'+fmt(r.mean)+' mm','A 类自由度：'+(r.m-1)];if(r.ul!==null)extra.push('相对标准不确定度：'+fmt(r.ul/r.lambda*100)+'%');if(r.reference!==null)extra.push('绝对误差：'+fmt(Math.abs(r.lambda-r.reference))+' nm；相对误差：'+fmt(Math.abs(r.lambda-r.reference)/r.reference*100)+'%');$('extra').textContent=extra.join('；');
+ $('pairInfo').textContent='共 '+r.k.length+' 个读数，分成 '+r.m+' 对；每对跨越 '+(r.m*r.h)+' 个条纹，位置差除以 '+r.m+'，折算为每 '+r.h+' 个条纹的位移。';
+ $('rows').innerHTML=r.pairs.map(p=>'<tr>'+[p.first+' ↔ '+p.last,p.dk,fmt(p.diff),fmt(p.x),fmt(p.lambda)].map(v=>'<td>'+v+'</td>').join('')+'</tr>').join('');
+ const warnings=[];if(r.delta===null)warnings.push('尚未输入 Δ：已计算波长与 A 类不确定度，B 类和合成结果暂不计算。');if(r.lambda<380||r.lambda>780)warnings.push('计算波长不在通常可见光范围内，请核对 d 是否使用 mm、k 是否为累计计数。');$('status').textContent=warnings.join('\n');
+ report=['迈克尔孙干涉仪数据处理报告（课件逐差法）','k = '+r.k.join(', '),'d / mm = '+r.d.join(', '),'有效误差限 Δ / mm = '+(r.delta===null?'未输入':r.delta),'参考波长 / nm = '+(r.reference===null?'未输入':r.reference),$('pairInfo').textContent,'λ / nm = '+fmt(r.lambda),'uA(Δd) / mm = '+fmt(r.ua),'uB(Δd) / mm = '+fmt(r.ub),'uc(Δd) / mm = '+fmt(r.uc),'uc(λ) / nm = '+fmt(r.ul),$('reported').textContent,...extra,'','配对\t条纹差\t位置差/mm\t单间隔位移/mm\t波长/nm',...r.pairs.map(p=>[p.first+'-'+p.last,p.dk,p.diff,p.x,p.lambda].join('\t')),'','计算公式及适用条件：',document.querySelector('details').innerText,...warnings].join('\r\n');$('export').disabled=false;
+ }catch(e){$('status').textContent=e.message}}
+ $('calculate').onclick=run;
+ $('example').onclick=()=>{$('k').value='0, 50, 100, 150, 200, 250, 300, 350, 400, 450';$('d').value='14.20092, 14.21676, 14.23255, 14.24840, 14.26420, 14.28003, 14.29586, 14.31167, 14.32750, 14.34331';$('delta').value='0.0001';$('reference').value='632.8';run();$('status').textContent='已加载模拟示例；Δ = 0.0001 mm 仅作演示，请用实际读数和实验规定的误差限替换。'};
+ $('clear').onclick=()=>{['k','d','delta','reference'].forEach(id=>$(id).value='');resetResults();$('status').textContent='';$('k').focus()};
+ ['k','d','delta','reference'].forEach(id=>$(id).addEventListener('input',()=>{resetResults();$('status').textContent='数据已修改，请重新计算。'}));
+ $('export').onclick=()=>{if(!last)return;const url=URL.createObjectURL(new Blob(['\ufeff'+report],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='迈克尔孙干涉仪计算报告.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+</script>
+</html>
